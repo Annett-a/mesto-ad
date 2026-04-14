@@ -22,7 +22,6 @@
 @import url('./__list-item/popup__list-item.css');
 @import url('./__list-item/_type/popup__list-item_type_badge.css');
 
-
 .popup {
   font-family: 'Inter', Arial, sans-serif;
   display: flex;
@@ -34,7 +33,7 @@
   left: 0;
   bottom: 0;
   right: 0;
-  /*Стили для плавного появления модалки*/
+  
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
