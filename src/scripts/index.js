@@ -24,11 +24,8 @@ const validationSettings = {
   errorClass: 'popup__error_visible',
 };
 
-const finalTaskVariant = Number(import.meta.env.VITE_MESTO_FINAL_VARIANT || '1');
-
 const placesWrap = document.querySelector('.places__list');
 const allPopups = document.querySelectorAll('.popup');
-const headerLogo = document.querySelector('.header__logo');
 
 const profileFormModalWindow = document.querySelector('.popup_type_edit');
 const profileForm = profileFormModalWindow.querySelector('.popup__form');
@@ -197,104 +194,12 @@ const handleInfoClick = (cardId) => {
     });
 };
 
-const handleLogoClick = () => {
-  getCardList()
-    .then((cards) => {
-      const cardsByDate = [...cards].sort((firstCard, secondCard) => {
-        return new Date(secondCard.createdAt) - new Date(firstCard.createdAt);
-      });
-      const uniqueOwners = new Map();
-
-      cardsByDate.forEach((card) => {
-        uniqueOwners.set(card.owner._id, card.owner.name);
-      });
-
-      if (finalTaskVariant === 2) {
-        const cardsByOwner = cardsByDate.reduce((accumulator, card) => {
-          const ownerCardCount = accumulator.get(card.owner._id) || 0;
-          accumulator.set(card.owner._id, ownerCardCount + 1);
-          return accumulator;
-        }, new Map());
-        const maxCardsPerUser = Math.max(0, ...cardsByOwner.values());
-        const oldestCard = cardsByDate[cardsByDate.length - 1];
-        const newestCard = cardsByDate[0];
-
-        const infoItems = [
-          createInfoString('Всего карточек:', String(cardsByDate.length)),
-          createInfoString(
-            'Первая создана:',
-            oldestCard ? formatDate(new Date(oldestCard.createdAt)) : 'Нет данных'
-          ),
-          createInfoString(
-            'Последняя создана:',
-            newestCard ? formatDate(new Date(newestCard.createdAt)) : 'Нет данных'
-          ),
-          createInfoString('Всего пользователей:', String(uniqueOwners.size)),
-          createInfoString(
-            'Максимум карточек от одного:',
-            String(maxCardsPerUser)
-          ),
-        ];
-
-        openInfoModal(
-          'Статистика пользователей',
-          'Все пользователи:',
-          infoItems,
-          Array.from(uniqueOwners.values())
-        );
-        return;
-      }
-
-      if (finalTaskVariant === 3) {
-        const likesTotal = cardsByDate.reduce((sum, card) => {
-          return sum + card.likes.length;
-        }, 0);
-        const maxLikesFromOneCard = Math.max(
-          0,
-          ...cardsByDate.map((card) => card.likes.length)
-        );
-        const likesByOwner = cardsByDate.reduce((accumulator, card) => {
-          const ownerLikes = accumulator.get(card.owner.name) || 0;
-          accumulator.set(card.owner.name, ownerLikes + card.likes.length);
-          return accumulator;
-        }, new Map());
-        const championLikes = [...likesByOwner.entries()].sort(
-          (firstUser, secondUser) => secondUser[1] - firstUser[1]
-        )[0]?.[0] || 'Нет данных';
-        const popularCards = [...cardsByDate]
-          .sort((firstCard, secondCard) => secondCard.likes.length - firstCard.likes.length)
-          .slice(0, 3)
-          .map((card) => card.name);
-
-        const infoItems = [
-          createInfoString('Всего пользователей:', String(uniqueOwners.size)),
-          createInfoString('Всего лайков:', String(likesTotal)),
-          createInfoString(
-            'Максимально лайков от одного:',
-            String(maxLikesFromOneCard)
-          ),
-          createInfoString('Чемпион лайков:', championLikes),
-        ];
-
-        openInfoModal(
-          'Статистика карточек',
-          'Популярные карточки:',
-          infoItems,
-          popularCards
-        );
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
 const renderCard = (cardData, method = 'append') => {
   const cardElement = createCard(cardData, currentUserId, {
     onPreviewPicture: handlePreviewPicture,
     onLikeClick: handleLikeClick,
     onDeleteClick: handleDeleteClick,
-    onInfoClick: finalTaskVariant === 1 ? handleInfoClick : null,
+    onInfoClick: handleInfoClick,
   });
 
   placesWrap[method](cardElement);
@@ -408,10 +313,6 @@ openCardFormButton.addEventListener('click', () => {
   clearValidation(cardForm, validationSettings);
   openModalWindow(cardFormModalWindow);
 });
-
-if (finalTaskVariant === 2 || finalTaskVariant === 3) {
-  headerLogo.addEventListener('click', handleLogoClick);
-}
 
 enableValidation(validationSettings);
 

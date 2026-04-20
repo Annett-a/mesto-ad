@@ -43,13 +43,9 @@ export const createCard = (cardData, currentUserId, handlers = {}) => {
     });
   }
 
-  if (handlers.onInfoClick) {
-    infoButton.addEventListener('click', () => {
-      handlers.onInfoClick(cardData._id);
-    });
-  } else {
-    infoButton.remove();
-  }
+  infoButton.addEventListener('click', () => {
+    handlers.onInfoClick(cardData._id);
+  });
 
   if (handlers.onLikeClick) {
     likeButton.addEventListener('click', () => {
