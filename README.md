@@ -15,7 +15,7 @@
 
 ## Ссылка на опубликованный проект
 
-[Открыть проект](https://github.com/Annett-a/mesto-production.git)
+https://annett-a.github.io/mesto-production/
 
 ## Запуск проекта
 
