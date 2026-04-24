@@ -75,7 +75,7 @@ export const clearValidation = (formElement, settings) => {
     hideInputError(formElement, inputElement, settings);
   });
 
-  disableSubmitButton(buttonElement, settings);
+  toggleButtonState(inputList, buttonElement, settings);
 };
 
 export const enableValidation = (settings) => {

@@ -1,4 +1,4 @@
-import {createCard} from './components/card.js';
+import { createCard, removeCardElement } from './components/card.js';
 import {
     openModalWindow,
     closeModalWindow,
@@ -148,50 +148,37 @@ const handlePreviewPicture = ({name, link}) => {
     openModalWindow(imageModalWindow);
 };
 
-const handleRequestError = () => {
-    // Ошибка запроса
+const handleRequestError = (err) => {
+    console.error(err);
 };
 
-const handleLikeClick = (cardData, setLikes) => {
-    const isLiked = cardData.likes.some((user) => user._id === currentUserId);
-
-    changeLikeCardStatus(cardData._id, isLiked)
-        .then((updatedCardData) => {
-            setLikes(updatedCardData.likes);
-        })
-        .catch(handleRequestError);
+const handleLikeClick = ({cardId, isLiked}) => {
+    return changeLikeCardStatus(cardId, isLiked);
 };
 
-const handleDeleteClick = (cardData, cardElement) => {
-    cardIdToDelete = cardData._id;
+const handleDeleteClick = ({cardId, cardElement}) => {
+    cardIdToDelete = cardId;
     cardElementToDelete = cardElement;
     openModalWindow(removeCardModalWindow);
 };
 
-const handleInfoClick = (cardId) => {
-    getCardList()
-        .then((cards) => {
-            const cardData = cards.find((card) => card._id === cardId);
+const handleInfoClick = (cardInfo) => {
+    const infoItems = [
+        createInfoString('Описание:', cardInfo.name),
+        createInfoString(
+            'Дата создания:',
+            formatDate(new Date(cardInfo.createdAt))
+        ),
+        createInfoString('Владелец:', cardInfo.ownerName),
+        createInfoString('Количество лайков:', String(cardInfo.likesCount)),
+    ];
 
-            if (!cardData) {
-                return;
-            }
-
-            const infoItems = [
-                createInfoString('Описание:', cardData.name),
-                createInfoString(
-                    'Дата создания:',
-                    formatDate(new Date(cardData.createdAt))
-                ),
-                createInfoString('Владелец:', cardData.owner.name),
-                createInfoString('Количество лайков:', String(cardData.likes.length)),
-            ];
-
-            const userLabels = cardData.likes.map((user) => user.name);
-
-            openInfoModal('Информация о карточке', 'Лайкнули:', infoItems, userLabels);
-        })
-        .catch(handleRequestError);
+    openInfoModal(
+        'Информация о карточке',
+        'Лайкнули:',
+        infoItems,
+        cardInfo.likedUserNames
+    );
 };
 
 const renderCard = (cardData, method = 'append') => {
@@ -200,6 +187,7 @@ const renderCard = (cardData, method = 'append') => {
         onLikeClick: handleLikeClick,
         onDeleteClick: handleDeleteClick,
         onInfoClick: handleInfoClick,
+        onRequestError: handleRequestError,
     });
 
     placesWrap[method](cardElement);
@@ -233,7 +221,6 @@ const handleAvatarFormSubmit = (evt) => {
         .then((userData) => {
             setProfileData(userData);
             avatarForm.reset();
-            clearValidation(avatarForm, validationSettings);
             closeModalWindow(avatarFormModalWindow);
         })
         .catch(handleRequestError)
@@ -253,7 +240,6 @@ const handleCardFormSubmit = (evt) => {
         .then((cardData) => {
             renderCard(cardData, 'prepend');
             cardForm.reset();
-            clearValidation(cardForm, validationSettings);
             closeModalWindow(cardFormModalWindow);
         })
         .catch(handleRequestError)
@@ -269,7 +255,7 @@ const handleRemoveCardFormSubmit = (evt) => {
     deleteCardRequest(cardIdToDelete)
         .then(() => {
             if (cardElementToDelete) {
-                cardElementToDelete.remove();
+                removeCardElement(cardElementToDelete);
             }
 
             closeModalWindow(removeCardModalWindow);

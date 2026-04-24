@@ -1,10 +1,4 @@
-const config = {
-  baseUrl: `https://mesto.nomoreparties.co/v1/${import.meta.env.VITE_MESTO_GROUP_ID || '{{ Ваш идентификатор группы }}'}`,
-  headers: {
-    authorization: import.meta.env.VITE_MESTO_TOKEN || '{{ Ваш личный токен }}',
-    'Content-Type': 'application/json',
-  },
-};
+import { config } from './config.js';
 
 const getResponseData = (res) => {
   return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
